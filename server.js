@@ -1,10 +1,11 @@
 const next = require('next')
 const express = require('express');
 const bodyParser = require('body-parser')
+const cluster = require('cluster');
+const numCPUs = require('os').cpus().length;
+
 
 const dev = process.env.NODE_ENV !== 'production'
-const app = next({ dev })
-const handle = app.getRequestHandler()
 const compression = require('compression');
 
 // const moviesData = require('./data.json')
@@ -15,7 +16,23 @@ const fs = require('fs')
 const path = require('path')
 const moviesData = require(filePath)
 
+// Multi-process to utilize all CPU cores.
+if (!dev && cluster.isMaster) {
+  console.log(`Node cluster master ${process.pid} is running`);
 
+  // Fork workers.
+  for (let i = 0; i < numCPUs; i++) {
+    cluster.fork();
+  }
+
+  cluster.on('exit', (worker, code, signal) => {
+    console.error(`Node cluster worker ${worker.process.pid} exited: code ${code}, signal ${signal}`);
+  });
+
+}else{
+  const app = next({ dev })
+  const handle = app.getRequestHandler()
+  
 
 app.prepare().then(() => {
 
@@ -102,3 +119,4 @@ server.patch('/api/v1/movies/:id', (req, res) => {
   console.error(ex.stack)
   process.exit(1)
 })
+}
