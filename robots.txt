@@ -1,3 +1,4 @@
-User-agent *
-Disallow: /create
-Disallow: /edit
+User-agent: *
+Disallow: /cgi-bin/
+Disallow: /tmp/
+Disallow: /~joe/
