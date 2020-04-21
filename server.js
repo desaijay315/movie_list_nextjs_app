@@ -138,7 +138,7 @@ if (!dev && cluster.isMaster) {
         nextHandler(req, res, parsedUrl);
       });
 
-      server.use(nextHandler).listen(port, (err) => {
+      server.listen(port, (err) => {
         if (err) throw err;
         console.log(`Listening on http://localhost:${port}`);
       });
