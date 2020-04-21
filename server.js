@@ -8,6 +8,11 @@ const numCPUs = require('os').cpus().length;
 const dev = process.env.NODE_ENV !== 'production';
 const port = process.env.PORT || 3000;
 
+const filePath = './data.json'
+const fs = require('fs')
+const path = require('path')
+const moviesData = require(filePath)
+
 // Multi-process to utilize all CPU cores.
 if (!dev && cluster.isMaster) {
   console.log(`Node cluster master ${process.pid} is running`);
@@ -57,7 +62,72 @@ if (!dev && cluster.isMaster) {
       // Example server-side routing
       server.get('/b', (req, res) => {
         return nextApp.render(req, res, '/a', req.query)
+      });
+
+
+      server.get('/api/v1/movies', (req, res) => {
+        return res.json(moviesData)
       })
+    
+      server.post('/api/v1/movies', (req, res) => {
+        const movie = req.body;
+        moviesData.push(movie);
+        const pathToFile = path.join(__dirname, filePath)
+        const stringifiedData = JSON.stringify(moviesData, null, 2)
+    
+        fs.writeFile(pathToFile, stringifiedData, (err) => {
+          if (err) {
+            return res.status(422).send(err)
+          }
+    
+          return res.json('Movie has been succesfuly added!')
+        })
+      })
+    
+      
+      server.get('/api/v1/movies/:id', (req, res) => {
+        const { id } = req.params
+        const movie = moviesData.find(m => m.id === id)
+    
+        return res.json(movie)
+      })
+      
+    
+      server.delete('/api/v1/movies/:id', (req, res) => {
+        const { id } = req.params
+        const movieIndex = moviesData.findIndex(m => m.id === id)
+        moviesData.splice(movieIndex, 1)
+    
+        const pathToFile = path.join(__dirname, filePath)
+        const stringifiedData = JSON.stringify(moviesData, null, 2)
+    
+        fs.writeFile(pathToFile, stringifiedData, (err) => {
+          if (err) {
+            return res.status(422).send(err)
+          }
+    
+          return res.json('Movie has been succesfuly added!')
+        })
+      })
+    
+    server.patch('/api/v1/movies/:id', (req, res) => {
+      const { id } = req.params
+      const movie = req.body
+      const movieIndex = moviesData.findIndex(m => m.id === id)
+    
+      moviesData[movieIndex] = movie
+    
+      const pathToFile = path.join(__dirname, filePath)
+      const stringifiedData = JSON.stringify(moviesData, null, 2)
+    
+      fs.writeFile(pathToFile, stringifiedData, (err) => {
+        if (err) {
+          return res.status(422).send(err)
+        }
+    
+        return res.json(movie)
+      })
+    })
 
       // Default catch-all renders Next app
       server.get('*', (req, res) => {
@@ -68,7 +138,7 @@ if (!dev && cluster.isMaster) {
         nextHandler(req, res, parsedUrl);
       });
 
-      server.listen(port, (err) => {
+      server.use(nextHandler).listen(port, (err) => {
         if (err) throw err;
         console.log(`Listening on http://localhost:${port}`);
       });
