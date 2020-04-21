@@ -5,6 +5,7 @@ const bodyParser = require('body-parser')
 const dev = process.env.NODE_ENV !== 'production'
 const app = next({ dev })
 const handle = app.getRequestHandler()
+const compression = require('compression');
 
 // const moviesData = require('./data.json')
 
@@ -19,7 +20,7 @@ const moviesData = require(filePath)
 app.prepare().then(() => {
 
   const server = express();
-
+  server.use(compression());
   server.use(bodyParser.json())
 
   server.get('/api/v1/movies', (req, res) => {
