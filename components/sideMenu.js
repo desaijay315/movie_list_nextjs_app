@@ -27,7 +27,7 @@ const SideMenu = (props) =>{
           <Modal hasSubmit={false}>
             <MovieCreateForm handleFormSubmit={handleCreateMovie} />
           </Modal>
-            <h1 className="my-4">Shop Name</h1>
+            <h1 className="my-4">IMDB</h1>
             <div className="list-group">
               {categories.map((category,index) =>(
                 <a
