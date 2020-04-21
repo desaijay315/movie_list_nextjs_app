@@ -3,7 +3,7 @@ const withSass = require('@zeit/next-sass');
 
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 
-module.exports = withCSS(withSass({
+module.exports = withCss(withSass({
   webpack(config, {dev}) {
     if (config.mode === 'production') {
       if (Array.isArray(config.optimization.minimizer)) {
